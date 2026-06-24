@@ -59,6 +59,7 @@ function login(){
 
     .then(function(result){
         if(result.message == "Login Successful"){
+            localStorage.setItem("loggedIn", "true");
             window.location="home.html";
 
         }
@@ -74,6 +75,7 @@ function login(){
 
 function logout(){
 
+    localStorage.removeItem("loggedIn");
     window.location.href = "login.html";
 
 }

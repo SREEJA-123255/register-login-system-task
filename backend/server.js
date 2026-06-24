@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
@@ -8,6 +9,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.use(express.static(path.join(__dirname)));
+
+app.get("/", (req,res)=>{
+    res.sendFile(path.join(__dirname, "login.html"));
+});
 
 mongoose.connect("mongodb+srv://sreeja2005:sreeja2005@cluster0.vtya4nj.mongodb.net/?appName=Cluster0")
 .then(() => {
@@ -90,7 +96,7 @@ app.post("/login", async(req,res)=>{
         else{
 
             res.json({
-                message:"Invalid credentials"
+                message:"User does not exist, please register"
             });
 
         }
