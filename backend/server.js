@@ -1,4 +1,5 @@
-const path = require("path");
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
@@ -9,13 +10,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use(express.static(path.join(__dirname)));
 
-app.get("/", (req,res)=>{
-    res.sendFile(path.join(__dirname, "login.html"));
-});
-
-mongoose.connect("mongodb+srv://sreeja2005:sreeja2005@cluster0.vtya4nj.mongodb.net/?appName=Cluster0")
+mongoose.connect(process.env.MONGO_URL)
 .then(() => {
     console.log("MongoDB Connected");
 })
@@ -25,25 +21,22 @@ mongoose.connect("mongodb+srv://sreeja2005:sreeja2005@cluster0.vtya4nj.mongodb.n
 
 
 
-const User = mongoose.model("User", {
-
-    name: String,
-    email: String,
-    mobile: String,
-    password: String
-
-});
+const User = require("./models/User");
 
 app.post("/register", async (req,res)=>{
 
     const data = req.body;
 
+    const existingUser = await User.findOne({ email: data.email });
+
+    if(existingUser){
+        return res.json({ message:"User already exists, please login" });
+    }
 
     const hashPassword = await bcrypt.hash(
         data.password,
         10
     );
-
 
     const user = new User({
 
@@ -54,12 +47,10 @@ app.post("/register", async (req,res)=>{
 
     });
 
-
     await user.save();
 
-
     res.json({
-        message:"Registration Successful"
+        message:"Registration Successful Please Login"
     });
 
 });
@@ -68,14 +59,11 @@ app.post("/register", async (req,res)=>{
 
 app.post("/login", async(req,res)=>{
 
-
     const user = await User.findOne({
 
         email:req.body.email
 
     });
-
-
 
     if(user){
 
@@ -85,32 +73,30 @@ app.post("/login", async(req,res)=>{
             user.password
         );
 
-
-        if(checkPassword){
+         if (checkPassword) {
 
             res.json({
-                message:"Login Successful"
+                message: "Login Successful"
+            });
+
+        } else {
+
+            res.json({
+                message: "Invalid Password"
             });
 
         }
-        else{
 
-            res.json({
-                message:"User does not exist, please register"
-            });
-
-        }
-
-    }
-    else{
+    } else {
 
         res.json({
-            message:"Invalid credentials"
+            message: "User not found. Please Register"
         });
 
     }
 
 });
+
 
 
 app.listen(5000,()=>{

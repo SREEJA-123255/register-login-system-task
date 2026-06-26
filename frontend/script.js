@@ -9,6 +9,12 @@ function register(){
         password: document.getElementById("password").value
     };
 
+    if(!user.name || !user.email || !user.mobile || !user.password){
+        
+    document.getElementById("msg").innerHTML = "Please fill all fields!";
+    return;
+    }
+
 
     fetch(API + "/register", {
         method:"POST",
@@ -26,6 +32,16 @@ function register(){
 
     .then(function(result){
         document.getElementById("msg").innerHTML = result.message;
+
+        if(result.message == "Registration Successful Please Login"){
+            localStorage.setItem("registered", "true");
+            window.location = "login.html";
+        }
+
+    })
+
+    .catch(function(error){
+        document.getElementById("msg").innerHTML = "Server error, try again!";
 
     });
 
@@ -59,6 +75,7 @@ function login(){
 
     .then(function(result){
         if(result.message == "Login Successful"){
+
             localStorage.setItem("loggedIn", "true");
             window.location="home.html";
 
@@ -69,6 +86,11 @@ function login(){
             result.message;
         }
 
+    })
+
+    .catch(function(error){
+        document.getElementById("msg").innerHTML = "Server error, try again!";
+
     });
 
 }
@@ -76,6 +98,7 @@ function login(){
 function logout(){
 
     localStorage.removeItem("loggedIn");
+    localStorage.removeItem("registered");
     window.location.href = "login.html";
 
 }
